@@ -347,7 +347,7 @@ const UserBoardDetail = () => {
                 type='text'
                 name='author'
                 id='commentAuthor'
-                value={localStorage.getItem('USER_NAME')}
+                value={localStorage.getItem('USER_NAME') || ''}
                 readOnly={true}
               />
             </FormGroup>
