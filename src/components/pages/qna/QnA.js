@@ -1,11 +1,13 @@
 import React, { useContext, useEffect, useState } from 'react';
 import './QnA.scss';
 import CategoryFilter from './CategoryFilter';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import handleRequest from '../../../utils/handleRequest';
 import axiosInstance from '../../../config/axios-config';
-import { API_BASE_URL, USER } from '../../../config/host-config';
+import { API_BASE_URL, QNA, USER } from '../../../config/host-config';
 import AuthContext from '../../../utils/AuthContext';
+import PageButton from '../pageButton/PageButton';
+import axios from 'axios';
 
 const categories = [
   {
@@ -94,6 +96,18 @@ const QnA = () => {
   const [cardOnOff, setCardOnOff] = useState(qnaList);
   const [showList, setShowList] = useState(qnaList);
   const { onLogout, role } = useContext(AuthContext);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState('전체');
+  const [activeQuestion, setActiveQuestion] = useState(null);
+  const requestUrl = API_BASE_URL + QNA;
+  const [myQnAData, setMyQnAData] = useState([]);
+  const [searchParams] = useSearchParams();
+  const initialPage = parseInt(searchParams.get('page')) || 1;
+  const [pageNo, setPageNo] = useState(initialPage);
+  const [totalPages, setTotalPages] = useState(1);
+  const [pageButtonCount, setPageButtonCount] = useState(0);
+  const [pageMaker, setPageMaker] = useState({});
+  const [filteredQnaData, setFilteredQnaData] = useState([]);
 
   const getQnACard = (item, index) => {
     return (
@@ -122,6 +136,12 @@ const QnA = () => {
       </div>
     );
   };
+  const handlePageChange = (no) => {
+    setPageNo(no);
+    if (location.pathname && pageNo !== no) {
+      navigate(`/myquestionlist?page=${no}`, { state: { page: no } });
+    }
+  };
 
   useEffect(() => {
     setShowList(
@@ -147,6 +167,75 @@ const QnA = () => {
       navigate,
     );
   };
+
+  const fetchQnAData = async () => {
+    try {
+      const userId = localStorage.getItem('USER_ID');
+      const userRole = localStorage.getItem('ROLE');
+
+      const body = JSON.stringify(myQnAData);
+      let url = `${requestUrl}?page=${pageNo}`;
+
+      if (userId) {
+        url += `&userId=${userId}`;
+        url += `&userRole=${userRole}`;
+      }
+
+      const res = await axios.get(url, body, {
+        headers: { 'Content-Type': 'application/json' },
+      });
+      // console.log(res.data);
+
+      // 서버 응답에서 qnas 배열을 추출하여 사용
+      if (res.data && Array.isArray(res.data.qnas)) {
+        setMyQnAData(res.data.qnas); // qnas 배열을 가져온 데이터로 설정
+        setTotalPages(res.data.pageMaker.finalPage); // 전체 페이지 수 설정
+        setPageButtonCount(res.data.pageMaker.end);
+        setPageMaker(res.data.pageMaker);
+      } else {
+        // qnas 배열이 없는 등의 예기치 않은 응답 처리
+        console.error('Unexpected response format:', res.data);
+        // 또는 데이터가 없는 경우 처리 로직 추가
+      }
+    } catch (error) {
+      console.error('Error fetching Q&A data:', error);
+      // 에러 처리 로직 추가
+    }
+  };
+  useEffect(() => {
+    fetchQnAData(); // 페이지 로드 시 데이터 불러오기
+  }, [searchParams, pageNo, location.state]);
+
+  useEffect(() => {
+    filterData(); // 필터링 적용
+  }, [myQnAData, selectedCategory]);
+
+  const filterData = () => {
+    if (selectedCategory === '전체') {
+      setFilteredQnaData(myQnAData);
+      // console.log(myQnAData);
+    } else {
+      const filteredData = myQnAData.filter(
+        (qna) => qna.qcategory === selectedCategory,
+      );
+      setFilteredQnaData(filteredData);
+    }
+  };
+
+  useEffect(() => {
+    const handleBackButton = (event) => {
+      if (event.state.usr !== null) {
+        setPageNo(event.state.usr.page);
+      } else {
+        setPageNo(1);
+      }
+    };
+
+    window.addEventListener('popstate', handleBackButton);
+    return () => {
+      window.removeEventListener('popstate', handleBackButton);
+    };
+  }, []);
 
   return (
     <div className='qnacontainer'>
@@ -179,6 +268,21 @@ const QnA = () => {
         <div className='faq-list'>
           {showList.map((item, index) => getQnACard(item, index))}
         </div>
+      </div>
+      <div
+        className='paging-container'
+        style={{
+          display: 'flex',
+          justifyContent: 'center',
+          marginTop: '100px',
+        }}
+      >
+        <PageButton
+          pageMaker={pageMaker}
+          buttonCount={pageButtonCount}
+          clickHandler={handlePageChange}
+          page={pageNo}
+        />
       </div>
     </div>
   );

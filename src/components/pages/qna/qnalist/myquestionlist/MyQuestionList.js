@@ -32,7 +32,7 @@ const QnAList = () => {
   const [selectedCategory, setSelectedCategory] = useState('전체');
   const [activeQuestion, setActiveQuestion] = useState(null);
   const navigate = useNavigate(); // useNavigate 훅 사용
-  const { role, phoneNumber, userId, token } = useContext(AuthContext);
+  const { role } = useContext(AuthContext);
   const requestUrl = API_BASE_URL + QNA;
   const [myQnAData, setMyQnAData] = useState([]);
   const [searchParams] = useSearchParams();
@@ -55,8 +55,9 @@ const QnAList = () => {
     setSelectedCategory(category.name);
   };
 
-  const handleRowClick = (id) => {
-    setActiveQuestion(activeQuestion === id ? null : id);
+  const handleRowClick = (no) => {
+    console.log('no:', no);
+    setActiveQuestion(no);
   };
 
   const handlePageChange = (no) => {
@@ -68,19 +69,22 @@ const QnAList = () => {
 
   const handleDeleteClick = async (id) => {
     console.log('삭제로직 작동');
+    const confirmed = window.confirm('게시글을 삭제하시겠습니까?');
     try {
-      const response = await axios.delete(`${API_BASE_URL}${QNA}/${id}`, {
-        headers: { 'content-type': 'application/json' },
-        params: {
-          userId: localStorage.getItem('USER_ID'),
-        },
-      });
-      const res = response.data;
+      if (confirmed) {
+        const response = await axios.delete(`${API_BASE_URL}${QNA}/${id}`, {
+          headers: { 'content-type': 'application/json' },
+          params: {
+            userId: localStorage.getItem('USER_ID'),
+          },
+        });
+        const res = response.data;
 
-      if (res) {
-        alert('게시글이 삭제되었습니다');
-      } else {
-        alert('이미 삭제된 게시글입니다.');
+        if (res) {
+          window.alert('게시글이 삭제되었습니다');
+        } else {
+          window.alert('이미 삭제된 게시글입니다.');
+        }
       }
     } catch (error) {
       alert('다시 시도해주세요');
@@ -91,7 +95,7 @@ const QnAList = () => {
       const userId = localStorage.getItem('USER_ID');
 
       const body = JSON.stringify(myQnAData);
-      let url = `${requestUrl}?page=${pageNo}`;
+      let url = `${requestUrl}/user?page=${pageNo}`;
 
       if (userId) {
         url += `&userId=${userId}`;
@@ -120,23 +124,38 @@ const QnAList = () => {
   };
   useEffect(() => {
     fetchQnAData(); // 페이지 로드 시 데이터 불러오기
-  }, [searchParams, pageNo, location.state, myQnAData]);
+  }, [searchParams, pageNo, location.state]);
 
   useEffect(() => {
-    const filterData = () => {
-      if (selectedCategory === '전체') {
-        setFilteredQnaData(myQnAData);
-        // console.log(myQnAData);
+    filterData(); // 필터링 적용
+  }, [myQnAData, selectedCategory]);
+
+  const filterData = () => {
+    if (selectedCategory === '전체') {
+      setFilteredQnaData(myQnAData);
+      // console.log(myQnAData);
+    } else {
+      const filteredData = myQnAData.filter(
+        (qna) => qna.qcategory === selectedCategory,
+      );
+      setFilteredQnaData(filteredData);
+    }
+  };
+
+  useEffect(() => {
+    const handleBackButton = (event) => {
+      if (event.state.usr !== null) {
+        setPageNo(event.state.usr.page);
       } else {
-        const filteredData = myQnAData.filter(
-          (qna) => qna.qcategory === selectedCategory,
-        );
-        setFilteredQnaData(filteredData);
+        setPageNo(1);
       }
     };
 
-    filterData(); // 페이지 렌더링 시 필터링 적용
-  }, [myQnAData, selectedCategory]);
+    window.addEventListener('popstate', handleBackButton);
+    return () => {
+      window.removeEventListener('popstate', handleBackButton);
+    };
+  }, []);
 
   return (
     <div className='qnacontainer' style={{ padding: '20px' }}>
@@ -196,34 +215,16 @@ const QnAList = () => {
               className='myQnaListInnerBox'
               // style={{ cursor: 'pointer' }}
               // onClick={() => handleRowClick(qna.id)}
+              style={{
+                cursor: 'pointer',
+              }}
+              onClick={() => handleRowClick(qna.qnaNo)}
             >
-              <div className='mqlistNum' onClick={() => handleRowClick(qna.id)}>
-                {qna.count}
-              </div>
-              <div
-                className='mqlistCategory'
-                onClick={() => handleRowClick(qna.count)}
-              >
-                {qna.qcategory}
-              </div>
-              <div
-                className='mqlistTitle'
-                onClick={() => handleRowClick(qna.count)}
-              >
-                {qna.qtitle}
-              </div>
-              <div
-                className='mqlistWriter'
-                onClick={() => handleRowClick(qna.count)}
-              >
-                {qna.qwriter}
-              </div>
-              <div
-                className='mqlistDate'
-                onClick={() => handleRowClick(qna.count)}
-              >
-                {qna.date}
-              </div>
+              <div className='mqlistNum'>{qna.count}</div>
+              <div className='mqlistCategory'>{qna.qcategory}</div>
+              <div className='mqlistTitle'>{qna.qtitle}</div>
+              <div className='mqlistWriter'>{qna.qwriter}</div>
+              <div className='mqlistDate'>{qna.date}</div>
 
               {role === 'ADMIN' && (
                 <div
@@ -234,10 +235,23 @@ const QnAList = () => {
                 </div>
               )}
             </div>
-            {activeQuestion === qna.id && (
-              <div className='responseBox'>
+            {activeQuestion !== null && activeQuestion === qna.qnaNo && (
+              <div
+                className='responseBox'
+                style={{
+                  margin: '20px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  borderRadius: '20px',
+                  padding: '20px',
+                  alignItems: 'flex-start',
+                  border: '1px solid gray',
+                  backgroundColor: '#9EB1C51C',
+                }}
+              >
                 <span className='a-mark'>A.</span>
-                <div className='responseText'>{qna.response}</div>
+                <div className='responseText'>질문:{qna.qcontent}</div>
+                <div className='responseText'>답변:{qna.qanswer}</div>
               </div>
             )}
           </div>

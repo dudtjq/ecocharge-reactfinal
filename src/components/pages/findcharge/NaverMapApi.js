@@ -1,6 +1,7 @@
 import React from 'react';
 import { NavermapsProvider } from 'react-naver-maps';
 import MapComponent from './MapComponent';
+import ChargeSpotDetailMap from './ChargeSpotDetailMap';
 const NaverMapApi = ({
   lat,
   lng,
@@ -10,19 +11,23 @@ const NaverMapApi = ({
   setZoom,
   onMarkerClick,
 }) => {
-  const id = process.env.REACT_APP_NAVER_MAP_CLIENT_ID;
   return (
-    <NavermapsProvider ncpClientId={id} submodules={['geocoder']}>
-      <MapComponent
-        lat={lat}
-        lng={lng}
-        addr={addr}
-        setGeometricData={setGeometricData}
-        markerLatLng={markerLatLng}
-        setZoom={setZoom}
-        onMarkerClick={onMarkerClick}
-      />
-    </NavermapsProvider>
+    <>
+      {location.pathname === '/findCharge' && (
+        <MapComponent
+          lat={lat}
+          lng={lng}
+          addr={addr}
+          setGeometricData={setGeometricData}
+          markerLatLng={markerLatLng}
+          setZoom={setZoom}
+          onMarkerClick={onMarkerClick}
+        />
+      )}
+      {location.pathname === '/ChargeSpotDetail' && (
+        <ChargeSpotDetailMap lat={lat} lng={lng} />
+      )}
+    </>
   );
 };
 

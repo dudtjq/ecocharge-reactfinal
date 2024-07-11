@@ -51,6 +51,7 @@ const QnAList = () => {
   const [selectedQna, setSelectedQna] = useState(null); // 선택된 질문 상태 추가
   const [answer, SetAnswer] = useState(''); //작성한 답변 값 저장 상태
   const [formData, setFormData] = useState({});
+  const [showansbox, setshowAnsBox] = useState(null);
   const navigate = useNavigate();
   const location = useLocation();
   const userId = localStorage.getItem('USER_ID');
@@ -76,20 +77,23 @@ const QnAList = () => {
   const handleQNADeleteClick = async (no) => {
     // 삭제처리함수
     console.log('삭제로직 작동');
+    const confirmed = window.confirm('게시글을 삭제하시겠습니까?');
     try {
-      const response = await axios.delete(`${API_BASE_URL}${QNA}/${no}`, {
-        headers: { 'content-type': 'application/json' },
-        params: {
-          userId: localStorage.getItem('USER_ID'),
-        },
-      });
-      const res = response.data;
+      if (confirmed) {
+        const response = await axios.delete(`${API_BASE_URL}${QNA}/${no}`, {
+          headers: { 'content-type': 'application/json' },
+          params: {
+            userId: localStorage.getItem('USER_ID'),
+          },
+        });
+        const res = response.data;
 
-      if (res) {
-        alert('게시글이 삭제되었습니다');
-        qnaListRenderingHandler();
-      } else {
-        alert('이미 삭제된 게시글입니다.');
+        if (res) {
+          window.alert('게시글이 삭제되었습니다');
+          qnaListRenderingHandler();
+        } else {
+          window.alert('이미 삭제된 게시글입니다.');
+        }
       }
     } catch (error) {
       alert('다시 시도해주세요');
@@ -104,6 +108,13 @@ const QnAList = () => {
 
   const qnaListRenderingHandler = async () => {
     let url = `${requestUrl}?page=${pageNo}`;
+    // const userId = localStorage.getItem('USER_ID');
+    // const userRole = localStorage.getItem('ROLE');
+    // if (userId) {
+    //   url += `&userId=${userId}`;
+    //   url += `&userRole=${userRole}`;
+    // }
+
     const res = await axios.get(url);
     setQnaData(res.data.qnas);
     setPageMaker(res.data.pageMaker);
@@ -166,7 +177,7 @@ const QnAList = () => {
       style={{ marginTop: '200px' }}
     >
       <ModalHeader toggle={toggleModal} style={{ fontWeight: 'bold' }}>
-        <h5 className='modal-header2'>답변 작성</h5>
+        답변 작성
       </ModalHeader>
       <ModalBody>
         <div>질문: {selectedQna?.qtitle}</div>
@@ -324,13 +335,19 @@ const QnAList = () => {
       <div className='qnaListContainer'>
         {filteredQnaData.map((qna) => (
           <div key={qna.qnaNo}>
-            <div className='qnaListInnerBox'>
+            <div
+              className='qnaListInnerBox'
+              style={{
+                cursor: 'pointer',
+              }}
+              onClick={() => setshowAnsBox(qna.qnaNo)}
+            >
               <div className='qlistNum'>{qna.count}</div>
               <div className='qlistCategory'>{qna.qcategory}</div>
               <div className='qlistTitle'>{qna.qtitle}</div>
               <div className='qlistWriter'>{qna.qwriter}</div>
               <div className='qlistDate'>{qna.date}</div>
-              {qna.quserId === userId || userRole === 'ADMIN' ? (
+              {userRole === 'ADMIN' ? (
                 <div
                   className='qlistAnswer'
                   onClick={() => handleAnswerClick(qna.qnaNo)}
@@ -347,32 +364,37 @@ const QnAList = () => {
                 </div>
               ) : null}
             </div>
-            <div
-              className='ansbox'
-              style={{
-                margin: '20px',
-                display: 'flex',
-                // backgroundColor: 'lightgray',
-                borderRadius: '20px',
-                padding: '20px',
-                alignItems: 'center',
-                border: '1px solid gray',
-                backgroundColor: '#9EB1C51C',
-              }}
-            >
-              <span
-                className='ansmark'
+            {showansbox !== null && showansbox === qna.qnaNo && (
+              <div
+                className='ansbox'
                 style={{
-                  color: 'skyblue',
-                  fontSize: '20px',
-                  marginRight: '30px',
-                  marginLeft: '10px',
+                  margin: '20px',
+                  display: 'flex',
+                  // backgroundColor: 'lightgray',
+                  flexDirection: 'column',
+                  borderRadius: '20px',
+                  padding: '20px',
+                  alignItems: 'flexstart',
+                  border: '1px solid gray',
+                  backgroundColor: '#9EB1C51C',
                 }}
               >
-                A.
-              </span>
-              <div className='ans'>답변내용: {qna.qanswer}</div>
-            </div>
+                <span
+                  className='ansmark'
+                  style={{
+                    display: 'flex',
+                    color: 'skyblue',
+                    fontSize: '20px',
+                    marginRight: '30px',
+                    marginLeft: '10px',
+                  }}
+                >
+                  A.
+                </span>
+                <div className='ans'>질문내용: {qna.qcontent}</div>
+                <div className='ans'>답변내용: {qna.qanswer}</div>
+              </div>
+            )}
           </div>
         ))}
       </div>

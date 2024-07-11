@@ -72,9 +72,9 @@ function MapComponent({
           <Marker
             key={index}
             position={new navermaps.LatLng(marker.lat, marker.lng)}
-            onClick={(e) => {
-              onMarkerClick(e.coord.y, e.coord.x);
-              console.log(e);
+            onClick={() => {
+              console.log(marker.lat);
+              onMarkerClick(marker.lat, marker.lng);
             }}
           ></Marker>
         ))}
