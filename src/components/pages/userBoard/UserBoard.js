@@ -37,6 +37,8 @@ const UserBoard = () => {
   const [pageButtonCount, setPageButtonCount] = useState(0);
   const [pageNo, setPageNo] = useState(page);
   const location = useLocation();
+  const userId = localStorage.getItem('USER_ID');
+  const userRole = localStorage.getItem('ROLE');
 
   // 검색 관련 상태 변수 추가
   const [searchType, setSearchType] = useState('title');
@@ -71,8 +73,29 @@ const UserBoard = () => {
     }
   };
 
-  const handleBoardDeleteClick = () => {
-    // 삭제함수 필요
+  //게시글 삭제로직
+  const handleBoardDeleteClick = async (boardNo) => {
+    console.log('삭제로직 작동');
+    const confirmed = window.confirm('게시글을 삭제하시겠습니까?');
+    try {
+      if (confirmed) {
+        const response = await axios.delete(
+          `${API_BASE_URL}/${BOARD}/delete/${boardNo}`,
+          {
+            headers: { 'content-type': 'application/json' },
+          },
+        );
+        const res = response.data;
+
+        if (res) {
+          window.alert('게시글이 삭제되었습니다');
+        } else {
+          window.alert('이미 삭제된 게시글입니다.');
+        }
+      }
+    } catch (error) {
+      alert('다시 시도해주세요');
+    }
   };
 
   const writeBoardFormHandler = async () => {
@@ -227,12 +250,14 @@ const UserBoard = () => {
               >
                 {board.createDate}
               </td>
-              <td
-                className='boardDeleteBtn'
-                onClick={() => handleBoardDeleteClick()}
-              >
-                <FontAwesomeIcon icon={faSquareMinus} />
-              </td>
+              {board.userId === userId || userRole === 'ADMIN' ? (
+                <td
+                  className='boardDeleteBtn'
+                  onClick={() => handleBoardDeleteClick(board.boardNo)}
+                >
+                  <FontAwesomeIcon icon={faSquareMinus} />
+                </td>
+              ) : null}
             </tr>
           ))}
         </tbody>

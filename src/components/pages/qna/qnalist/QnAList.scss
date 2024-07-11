@@ -117,12 +117,16 @@
     .mqlistDeleteBtn {
       font-size: 20px;
       margin-left: 15px;
+      opacity: 0;
 
       &:hover {
           background: red;
           padding: 0 5px;
           border-radius: 5px;
       }
+  }
+  &:hover .mqlistDeleteBtn {
+    opacity: 1;
   }
   }
 }

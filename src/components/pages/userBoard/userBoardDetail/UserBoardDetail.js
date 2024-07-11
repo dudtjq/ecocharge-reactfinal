@@ -25,6 +25,8 @@ import {
   faThumbsDown,
   faFontAwesome,
   faChevronLeft,
+  faPenToSquare,
+  faSquareMinus,
   faTrash,
 } from '@fortawesome/free-solid-svg-icons';
 import axios from 'axios';
@@ -38,10 +40,11 @@ const UserBoardDetail = () => {
 
   const [comments, setComments] = useState([]);
   const [commentText, setCommentText] = useState('');
-  const [commentAuthor, setCommentAuthor] = useState('');
+  const [flag, setFlag] = useState(null);
   const [likes, setLikes] = useState(0);
   const [dislikes, setDislikes] = useState(0);
   const { onLogout } = useContext(AuthContext);
+  const [reply, setReply] = useState({});
 
   // State for report modal
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
@@ -60,61 +63,108 @@ const UserBoardDetail = () => {
   const boardNo = parseInt(searchParams.get('boardNo')) || 1;
   const replyNo = parseInt(searchParams.get('replyNo')) || 1;
   const userName = localStorage.getItem('USER_NAME');
+  const userId = localStorage.getItem('USER_ID');
+  const userRole = localStorage.getItem('ROLE');
 
   useEffect(() => {
     const boardDetailRenderingHandler = async () => {
-      const boardDetail = await axios.get(
-        `${API_BASE_URL}${BOARD}/detail?boardNo=${boardNo}`,
-      );
-      console.log(boardDetail);
-      setDetailBoard(boardDetail.data);
+      try {
+        const boardDetail = await axios.get(
+          `${API_BASE_URL}${BOARD}/detail?boardNo=${boardNo}`,
+        );
+        console.log(boardDetail);
+        setDetailBoard(boardDetail.data);
+      } catch (error) {
+        console.error('Error fetching board detail:', error);
+      }
     };
 
     boardDetailRenderingHandler();
-  }, []);
+  }, [boardNo]);
 
-  console.log(detailBoard);
+  useEffect(() => {
+    const replyRenderingHandler = async () => {
+      try {
+        const response = await axios.get(
+          `${API_BASE_URL}/ecocharge/board/reply/list/${boardNo}`,
+        );
+        console.log(response.data);
+        setComments(response.data.replies); // 서버로부터 받은 댓글 데이터 설정
+      } catch (error) {
+        console.error('Error fetching replies:', error);
+      }
+    };
+
+    replyRenderingHandler();
+  }, [flag]);
+
   const toggleReportModal = () => {
     setIsReportModalOpen(!isReportModalOpen);
   };
 
-  const handleBoardDetailDelete = async () => {
-    // 게시글 삭제 처리 함수 필요
-    handleRequest(
-      () => axiosInstance.delete(`${API_BASE_URL}${BOARD}/delete/${boardNo}`),
-      (data) => {
-        alert('게시물이 삭제되었습니다.');
-        navigate('/board');
-      },
-      onLogout,
-      navigate,
-    );
+  const handleReplyDeleteClick = async (no) => {
+    // 삭제처리함수
+    console.log('삭제로직 작동');
+    const confirmed = window.confirm('댓글을 삭제하시겠습니까?');
+    try {
+      if (confirmed) {
+        const response = await axios.delete(
+          `${API_BASE_URL}/ecocharge/board/reply/${no}`,
+          {
+            headers: { 'content-type': 'application/json' },
+            params: {
+              userId,
+            },
+          },
+        );
+        const res = response.data;
+
+        if (res) {
+          window.alert('댓글이 삭제되었습니다');
+          setFlag(1);
+        } else {
+          window.alert('이미 삭제된 댓글입니다.');
+        }
+      }
+    } catch (error) {
+      alert('다시 시도해주세요');
+    }
   };
 
-  //댓글 작성 핸들링
+  const handleBoardDetailDelete = async () => {
+    try {
+      await axiosInstance.delete(`${API_BASE_URL}${BOARD}/delete/${boardNo}`);
+      alert('게시물이 삭제되었습니다.');
+      navigate('/board');
+    } catch (error) {
+      handleRequest(error, onLogout, navigate);
+    }
+  };
+
   const handleCommentSubmit = async (e) => {
     e.preventDefault();
 
-    try {
-      await axios.post(`${API_BASE_URL}/ecocharge/qna/reply/${replyNo}`, {
-        text: commentText,
-        author: commentAuthor,
-      });
+    const body = {
+      replyText: commentText,
+      replyWriter: userName,
+      time: new Date().toLocaleString(),
+      replyNo,
+      boardNo,
+      userId,
+    };
 
-      const newComment = {
-        text: commentText,
-        author: commentAuthor,
-        time: new Date().toLocaleString(),
-      };
-      setComments([...comments, newComment]);
-      setCommentText('');
-      setCommentAuthor('');
+    try {
+      await axios.post(
+        `${API_BASE_URL}/ecocharge/board/reply/${boardNo}`,
+        body,
+      );
       alert('댓글이 작성되었습니다.');
     } catch (error) {
       console.error('Error adding comment:', error);
-      alert('다시 시도해주세요');
-      // Handle error
+      alert('댓글 작성 중 오류가 발생했습니다.');
     }
+    setFlag(1);
+    setCommentText('');
   };
 
   const handleLike = () => {
@@ -127,14 +177,16 @@ const UserBoardDetail = () => {
 
   const handleSubmitReport = (e) => {
     e.preventDefault();
-    // Gather report data and handle submission (e.g., send to server)
+
     const reportData = {
       reporterEmail,
       reportReason,
       reportDetails: reporterText,
     };
+
     console.log('Submitted report:', reportData);
-    // You can reset form fields or close the modal here
+    alert('신고되었습니다.');
+
     setIsReportModalOpen(false);
     setReporterEmail('');
     setReportReason({
@@ -161,17 +213,18 @@ const UserBoardDetail = () => {
           justifyContent: 'end',
         }}
       >
-        <Grid
-          className='boardDetailDeleteBtn'
-          onClick={handleBoardDetailDelete}
-        >
-          {' '}
-          <div className='deletement'>
-            삭제하기&nbsp;
-            <FontAwesomeIcon icon={faTrash} />
-          </div>
-        </Grid>
-
+        {detailBoard.userId === userId ||
+          (userRole === 'ADMIN' && (
+            <Grid
+              className='boardDetailDeleteBtn'
+              onClick={handleBoardDetailDelete}
+            >
+              <div className='deletement'>
+                삭제하기&nbsp;
+                <FontAwesomeIcon icon={faTrash} />
+              </div>
+            </Grid>
+          ))}
         <Grid className='accuseBtnBox' onClick={toggleReportModal}>
           <div className='accuseText'>
             신고하기&nbsp;
@@ -192,19 +245,35 @@ const UserBoardDetail = () => {
           </div>
           <div className='BoardInfoDetail'>조회수: {detailBoard.viewCount}</div>
         </Grid>
-        <CardImg
-          className='UBDcardIMG'
-          alt='Card image cap'
-          src={detailBoard.bprofileImage}
-          top
-          width='100%'
-        />
-        <CardBody className='UBDcardBody'>
-          <CardTitle tag='h5' className='UBDcardTitle'>
-            {detailBoard.btitle}
-          </CardTitle>
-          <CardText>{detailBoard.bcontent}</CardText>
-        </CardBody>
+        {detailBoard.bprofileImage != null && (
+          <CardImg
+            className='UBDcardIMG'
+            alt='Card image cap'
+            src={detailBoard.bprofileImage}
+            top
+            width='100%'
+          />
+        )}
+        {detailBoard.bprofileImage != null ? (
+          <CardBody className='UBDcardBody'>
+            <CardTitle tag='h5' className='UBDcardTitle'>
+              {detailBoard.btitle}
+            </CardTitle>
+            <CardText>{detailBoard.bcontent}</CardText>
+          </CardBody>
+        ) : (
+          <CardBody
+            className='UBDcardBody'
+            style={{
+              height: '400px',
+            }}
+          >
+            <CardTitle tag='h5' className='UBDcardTitle'>
+              {detailBoard.btitle}
+            </CardTitle>
+            <CardText>{detailBoard.bcontent}</CardText>
+          </CardBody>
+        )}
       </Card>
 
       {/* 좋아요 및 싫어요 버튼 */}
@@ -233,15 +302,24 @@ const UserBoardDetail = () => {
             댓글
           </CardTitle>
           {comments.length > 0 ? (
-            comments.map((comment, index) => (
-              <div key={index} className='comment'>
+            comments.map((comment) => (
+              <div key={comment.replyNo} className='comment'>
                 <CardText>
-                  <strong>{comment.author}</strong>
+                  <strong>{comment.replyWriter}</strong>
                 </CardText>
-                <CardText>{comment.text}</CardText>
+                <CardText>{comment.replyDate}</CardText>
                 <CardText>
-                  <small className='text-muted'>{comment.time}</small>
+                  <small className='text-muted'>{comment.replyText}</small>
                 </CardText>
+                {comment.userId === userId || userRole === 'ADMIN' ? (
+                  <div
+                    className='mqlistDeleteBtn'
+                    onClick={() => handleReplyDeleteClick(comment.replyNo)}
+                  >
+                    <FontAwesomeIcon icon={faSquareMinus} />
+                  </div>
+                ) : null}
+
                 <hr />
               </div>
             ))
@@ -255,7 +333,6 @@ const UserBoardDetail = () => {
       <Card className='UBD-card-container'>
         <CardBody className='UBD-container-form'>
           <Form onSubmit={handleCommentSubmit}>
-            {/* 백엔드 연동이 되어있지 않아 로그인 후 댓글 작성시 화면구현이 어려워서 예시용으로 넣음 */}
             <FormGroup>
               <Label
                 for='commentAuthor'

@@ -73,7 +73,6 @@ const QnAList = () => {
     toggleModal(); // 모달 창 열기
   };
 
-  // const handleTdClick = () => {};
   const handleQNADeleteClick = async (no) => {
     // 삭제처리함수
     console.log('삭제로직 작동');
@@ -248,7 +247,7 @@ const QnAList = () => {
           <FontAwesomeIcon icon={faChevronLeft} /> &nbsp;Back
         </div>
       </div>
-      <div className='qnatitle'>1 : 1 문의</div>
+      <div className='qnatitle'>Q & A</div>
       <div className='comentbox'>
         <div className='comment-inner'>
           <div className='coment'>
