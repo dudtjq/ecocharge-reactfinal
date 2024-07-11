@@ -73,6 +73,16 @@ const QnAList = () => {
     toggleModal(); // 모달 창 열기
   };
 
+  const toggleAnswerBox = (qnaNo) => {
+    if (showansbox === qnaNo) {
+      // 이미 열린 상태이면 닫기
+      setshowAnsBox(null);
+    } else {
+      // 닫혀 있거나 다른 질문의 답변이 열린 경우, 해당 질문의 답변을 열기
+      setshowAnsBox(qnaNo);
+    }
+  };
+
   const handleQNADeleteClick = async (no) => {
     // 삭제처리함수
     console.log('삭제로직 작동');
@@ -339,7 +349,7 @@ const QnAList = () => {
               style={{
                 cursor: 'pointer',
               }}
-              onClick={() => setshowAnsBox(qna.qnaNo)}
+              onClick={() => toggleAnswerBox(qna.qnaNo)}
             >
               <div className='qlistNum'>{qna.count}</div>
               <div className='qlistCategory'>{qna.qcategory}</div>
