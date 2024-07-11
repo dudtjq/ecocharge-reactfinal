@@ -29,6 +29,8 @@ const UserBoard = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const page = parseInt(searchParams.get('page')) || 1;
+  const { state } = useLocation();
+  const boardNo = parseInt();
 
   const [boardList, setBoardList] = useState([]);
   const { onLogout } = useContext(AuthContext);
@@ -187,7 +189,7 @@ const UserBoard = () => {
                 className='Bno'
                 onClick={async () => {
                   await axios.get(`${API_BASE_URL}${BOARD}/${board.boardNo}`);
-                  navigate(`${BOARD}/detail?boardNo=${board.boardNo}`, {
+                  navigate(`${BOARD}/detail?boardNo=${board.count}`, {
                     state: board.boardNo,
                   });
                 }}
@@ -198,7 +200,7 @@ const UserBoard = () => {
                 className='Btitle'
                 onClick={async () => {
                   await axios.get(`${API_BASE_URL}${BOARD}/${board.boardNo}`);
-                  navigate(`${BOARD}/detail?boardNo=${board.boardNo}`, {
+                  navigate(`${BOARD}/detail?boardNo=${board.count}`, {
                     state: board.boardNo,
                   });
                 }}
@@ -209,7 +211,7 @@ const UserBoard = () => {
                 className='Bwriter'
                 onClick={async () => {
                   await axios.get(`${API_BASE_URL}${BOARD}/${board.boardNo}`);
-                  navigate(`${BOARD}/detail?boardNo=${board.boardNo}`, {
+                  navigate(`${BOARD}/detail?boardNo=${board.count}`, {
                     state: board.boardNo,
                   });
                 }}
@@ -220,9 +222,10 @@ const UserBoard = () => {
                 className='Bdate'
                 onClick={async () => {
                   await axios.get(`${API_BASE_URL}${BOARD}/${board.boardNo}`);
-                  navigate(`${BOARD}/detail?boardNo=${board.boardNo}`, {
-                    state: board.boardNo,
-                  });
+                  navigate(
+                    `${BOARD}/detail?boardNo=${board.count}`,
+                    searchParams,
+                  );
                 }}
               >
                 {board.createDate}
