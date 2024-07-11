@@ -199,7 +199,7 @@ function ChargeSpotDetail() {
           </div>
           {aroundInfo && (
             <div className='section'>
-              <h2>OO시 충전소 목록</h2>
+              <h2>근처 충전소 목록</h2>
               {aroundInfo.map((info, index) => (
                 <div key={index} className='aroundList'>
                   <p>{info.addr}</p>
