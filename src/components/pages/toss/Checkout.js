@@ -1,9 +1,12 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import { loadTossPayments } from '@tosspayments/payment-sdk';
 import { API_BASE_URL, CONFIRM } from '../../../config/host-config';
 import { nanoid } from 'nanoid';
 import { loadPaymentWidget } from '@tosspayments/payment-widget-sdk';
 import { useNavigate } from 'react-router-dom';
+import handleRequest from '../../../utils/handleRequest';
+import axiosInstance from '../../../config/axios-config';
+import AuthContext from '../../../utils/AuthContext';
 
 const Checkout = () => {
   const navigate = useNavigate();
@@ -13,6 +16,7 @@ const Checkout = () => {
   const [paymentWidget, setPaymentWidget] = useState(null);
   const paymentMethodsWidgetRef = useRef(null);
   const [price, setPrice] = useState(50000);
+  const { onLogout } = useContext(AuthContext);
   // const [reserv, setReserv] = useState({
   //   amount: 1000, // 결제 예시 금액
   // });
@@ -58,6 +62,11 @@ const Checkout = () => {
     paymentMethodsWidget.updateAmount(price);
   }, [price]);
 
+  const eventOpne = () => {
+    handlePaymentRequest();
+    createReservation();
+  };
+
   const handlePaymentRequest = async () => {
     // 결제를 요청하기 전에 orderId, amount를 서버에 저장하세요.
     // 결제 과정에서 악의적으로 결제 금액이 바뀌는 것을 확인하는 용도입니다.
@@ -75,6 +84,20 @@ const Checkout = () => {
     } catch (error) {
       console.error('Error requesting payment:', error);
     }
+  };
+
+  // 예약 등록 요청
+  const createReservation = async () => {
+    handleRequest(
+      () =>
+        axiosInstance.post(`${API_BASE_URL}/reservation`, {
+          userId: localStorage.getItem('USER_ID'),
+          statId: localStorage.getItem('STAT_ID'),
+          startTime: localStorage.getItem('START_TIME'),
+          finishTime: localStorage.getItem('FINISH_TIME'),
+        }),
+      navigate,
+    );
   };
 
   // const handlePayment = (paymentType) => {
@@ -103,7 +126,7 @@ const Checkout = () => {
         <div id='payment-widget' />
         <div id='agreement' />
         {/* 결제하기 버튼 */}
-        <button style={{ width: '90px' }} onClick={handlePaymentRequest}>
+        <button style={{ width: '90px' }} onClick={eventOpne}>
           예약 하기
         </button>
       </div>

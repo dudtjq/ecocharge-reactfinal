@@ -23,6 +23,8 @@ const handleError = (error, onLogout, redirection) => {
     // 403 에러에 대한 내용...
     alert('요청하신 정보를 찾을 수 없습니다.');
     redirection('/');
+  } else {
+    alert(error);
   }
 };
 

@@ -34,6 +34,7 @@ function ChargeSpotDetail() {
   const navigate = useNavigate();
   const [aroundInfo, setAroundInfo] = useState(null);
   const { onLogout } = useContext(AuthContext);
+  const [reservationList, setReservationList] = useState([]);
 
   // 더미 데이터
   const address = '서울특별시 마포구 백범로 123-56';
@@ -55,14 +56,18 @@ function ChargeSpotDetail() {
       );
 
       setSpotInfo(res.data);
+      setReservationList(res.data.chargerList);
+      localStorage.setItem('STAT_ID', statId);
       console.log(res.data);
       if (res) {
         const lat = res.data.latLng.split(',')[0];
         const lng = res.data.latLng.split(',')[1];
         setLatLng({ lat, lng });
       }
+      console.log(res.data.chargerList);
     };
     fetchSpotDetail();
+    console.log(reservationList);
   }, [location.search]);
 
   useEffect(() => {
@@ -122,6 +127,22 @@ function ChargeSpotDetail() {
     );
   };
 
+  // 충전기 정보 요청 함수
+  // const chargerInfo = async () => {
+  //   handleRequest(
+  //     () =>
+  //       axiosInstance.post(`${API_BASE_URL}/reservation/list`, {
+  //         userId: localStorage.getItem('USER_ID'),
+  //       }),
+  //     (data) => {
+  //       setReservationList(data);
+  //       console.log(data);
+  //     },
+  //     onLogout,
+  //     navigate,
+  //   );
+  // };
+
   const handleBackToList = () => {
     navigate('/findCharge');
   };
@@ -157,6 +178,8 @@ function ChargeSpotDetail() {
       } else {
         setWarning('');
       }
+      localStorage.setItem('START_TIME', startTime);
+      localStorage.setItem('FINISH_TIME', endTime);
     }
   }, [startTime, endTime]);
 
@@ -240,10 +263,23 @@ function ChargeSpotDetail() {
             fullWidth
             margin='normal'
           >
-            <MenuItem value='charger1'>충전기 1</MenuItem>
+            {reservationList &&
+              reservationList.map((charger) => (
+                <MenuItem value={charger.chargerId}>
+                  <div>
+                    <div>{charger.chargerId}</div>
+                    {charger.ynCheck === 'n' ? (
+                      <div>예약 불가</div>
+                    ) : (
+                      <div>예약 가능</div>
+                    )}
+                  </div>
+                </MenuItem>
+              ))}
+            {/* <MenuItem value='charger1'>충전기 1</MenuItem>
             <MenuItem value='charger2'>충전기 2</MenuItem>
             <MenuItem value='charger3'>충전기 3</MenuItem>
-            <MenuItem value='charger4'>충전기 4</MenuItem>
+            <MenuItem value='charger4'>충전기 4</MenuItem> */}
           </TextField>
 
           <TextField
