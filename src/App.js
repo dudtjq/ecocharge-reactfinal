@@ -28,8 +28,10 @@ import FindIdPw from './components/user/FindIdPw.js';
 
 import PrivateRoute from './config/PrivateRoute.js';
 import Errorpage from './Errorpage.js';
+import { NavermapsProvider } from 'react-naver-maps';
 function App() {
   const location = useLocation();
+  const id = process.env.REACT_APP_NAVER_MAP_CLIENT_ID;
 
   const Errorpagename = ['/*'];
   return (
@@ -46,46 +48,53 @@ function App() {
       >
         <Header />
         {/* <Main /> */}
-        <Routes>
-          <Route path='/carList' element={<CarList />} />
-          <Route path='/findCharge' element={<FindCharge />} />
-          {/* <Route path='/newInfo' element={<NewInfo />} />
-          <Route path='/newInfoWrite' element={<NewInfoWrite />} /> */}
-          <Route path='/board' element={<UserBoard />} />
-          <Route path='/board/detail' element={<UserBoardDetail />} />
-          <Route element={<PrivateRoute />}>
-            <Route path='/writeBoardForm' element={<WriteBoardForm />} />
-            <Route path='/myPage' element={<MyPage />} />
-            <Route path='/qnalist' element={<QnAList />} />
-            <Route path='/writeqna' element={<WriteQnA />} />
-          </Route>
-          <Route path='/qna' element={<QnA />} />
-          <Route path='/questionform' element={<QuestionForm />} />
-          <Route path='/myquestionlist' element={<MyQuestionList />} />
-          <Route path='/login' element={<Login />} />
-          <Route path='/ChargeSpotDetail' element={<ChargeSpotDetail />} />
-          <Route path='/FindIdPw' element={<FindIdPw />} />
-          <Route path='/oauth/kakao' element={<KakaoLoginHandler />} />
-          <Route path='/oauth/naver' element={<NaverLoginHandler />} />
-          <Route path='/oauth/google' element={<GoogleLoginHandler />} />
-          <Route path='/sms' element={<SmsVerification />} />
-          <Route path='/success' element={<End />}></Route>
-          {/*  */}
-          {/* 필요한 다른 라우트 추가 */}
+        <NavermapsProvider
+          ncpClientId={id}
+          submodules={['geocoder']}
+          useHttps={true}
+        >
+          <Routes>
+            <Route path='/carList' element={<CarList />} />
+            <Route path='/findCharge' element={<FindCharge />} />
+            <Route path='/ChargeSpotDetail' element={<ChargeSpotDetail />} />
 
-          <Route
-            path='/'
-            element={
-              <div className='main'>
-                {/* <SearchBar /> */}
-                {/* <SimpleSlider />
+            {/* <Route path='/newInfo' element={<NewInfo />} />
+          <Route path='/newInfoWrite' element={<NewInfoWrite />} /> */}
+            <Route path='/board' element={<UserBoard />} />
+            <Route path='/board/detail' element={<UserBoardDetail />} />
+            <Route element={<PrivateRoute />}>
+              <Route path='/writeBoardForm' element={<WriteBoardForm />} />
+              <Route path='/myPage' element={<MyPage />} />
+              <Route path='/qnalist' element={<QnAList />} />
+              <Route path='/writeqna' element={<WriteQnA />} />
+            </Route>
+            <Route path='/qna' element={<QnA />} />
+            <Route path='/questionform' element={<QuestionForm />} />
+            <Route path='/myquestionlist' element={<MyQuestionList />} />
+            <Route path='/login' element={<Login />} />
+            <Route path='/FindIdPw' element={<FindIdPw />} />
+            <Route path='/oauth/kakao' element={<KakaoLoginHandler />} />
+            <Route path='/oauth/naver' element={<NaverLoginHandler />} />
+            <Route path='/oauth/google' element={<GoogleLoginHandler />} />
+            <Route path='/sms' element={<SmsVerification />} />
+            <Route path='/success' element={<End />}></Route>
+            {/*  */}
+            {/* 필요한 다른 라우트 추가 */}
+
+            <Route
+              path='/'
+              element={
+                <div className='main'>
+                  {/* <SearchBar /> */}
+                  {/* <SimpleSlider />
               <MainInfo /> */}
-                <Main />
-              </div>
-            }
-          />
-          <Route path='/*' element={<Errorpage />}></Route>
-        </Routes>
+                  <Main />
+                </div>
+              }
+            />
+            <Route path='/*' element={<Errorpage />}></Route>
+          </Routes>
+        </NavermapsProvider>
         <ScrollToTopButton />
         {!Errorpagename.includes(location.pathname) && <Footer />}
       </div>

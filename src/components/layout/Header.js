@@ -79,7 +79,7 @@ const Header = () => {
               }}
             >
               <img
-                src='MainLogo.png'
+                src='https://s3.ap-northeast-2.amazonaws.com/ecocharge.co.kr/mainLogo.png'
                 alt='Logo'
                 style={{
                   width: 200,

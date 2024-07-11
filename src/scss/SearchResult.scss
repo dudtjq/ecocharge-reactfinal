@@ -5,6 +5,8 @@
   border-radius: 4px;
   background-color: #f9f9f9;
   color: #333;
+  max-height: 500px;
+  overflow: auto;
 
   h2 {
     font-size: 25px;
@@ -23,5 +25,9 @@
     li {
       margin-bottom: 0.5rem;
     }
+  }
+
+  &::-webkit-scrollbar {
+    width: 0; /* 스크롤 바의 너비 */
   }
 }

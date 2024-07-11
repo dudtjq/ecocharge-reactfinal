@@ -15,6 +15,7 @@ import './UserBoardDetail.scss';
 import { Grid } from '@mui/material';
 import {
   createSearchParams,
+  useLocation,
   useNavigate,
   useParams,
   useSearchParams,
@@ -30,13 +31,19 @@ import {
   faTrash,
 } from '@fortawesome/free-solid-svg-icons';
 import axios from 'axios';
-import { API_BASE_URL, BOARD } from '../../../../config/host-config';
+import {
+  API_BASE_URL,
+  BOARD,
+  BOARD_REPLY,
+} from '../../../../config/host-config';
 import handleRequest from '../../../../utils/handleRequest';
 import axiosInstance from '../../../../config/axios-config';
 import AuthContext from '../../../../utils/AuthContext';
 
 const UserBoardDetail = () => {
   const navigate = useNavigate();
+  const REQUEST_URL = API_BASE_URL + BOARD_REPLY;
+  const { state } = useLocation();
 
   const [comments, setComments] = useState([]);
   const [commentText, setCommentText] = useState('');
@@ -68,17 +75,13 @@ const UserBoardDetail = () => {
 
   useEffect(() => {
     const boardDetailRenderingHandler = async () => {
-      try {
-        const boardDetail = await axios.get(
-          `${API_BASE_URL}${BOARD}/detail?boardNo=${boardNo}`,
-        );
-        console.log(boardDetail);
-        setDetailBoard(boardDetail.data);
-      } catch (error) {
-        console.error('Error fetching board detail:', error);
-      }
+      const boardDetail = await axios.get(
+        `${API_BASE_URL}${BOARD}/detail?boardNo=${state}`,
+      );
+      console.log(boardDetail);
+      setDetailBoard(boardDetail.data);
+      console.log(state);
     };
-
     boardDetailRenderingHandler();
   }, [boardNo]);
 
@@ -238,7 +241,7 @@ const UserBoardDetail = () => {
       </Grid>
       <Card className='UBD-card-container'>
         <Grid className='UserBoardInfo'>
-          <div className='BoardInfoDetail'>글번호: {detailBoard.boardNo}</div>
+          <div className='BoardInfoDetail'>글번호: {boardNo}</div>
           <div className='BoardInfoDetail'>작성자: {detailBoard.bwriter}</div>
           <div className='BoardInfoDetail'>
             작성일: {detailBoard.createDate}
@@ -340,6 +343,13 @@ const UserBoardDetail = () => {
               >
                 {userName != null ? userName : '작성자'}
               </Label>
+              <Input
+                type='text'
+                name='author'
+                id='commentAuthor'
+                value={localStorage.getItem('USER_NAME')}
+                readOnly={true}
+              />
             </FormGroup>
             <FormGroup>
               <Label for='commentText' style={{ fontWeight: 'bold' }}>

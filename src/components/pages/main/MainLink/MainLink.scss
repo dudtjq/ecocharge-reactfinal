@@ -1,12 +1,14 @@
 .main-link-container {
     // background-color: bisque;
     margin-top: 100px;
-    width: 72%;
+    width: 100%;
     height: 1400px;
+    background: rgb(199, 215, 230);
 
     .eTitleBox {
         text-align: center;
         margin-bottom: 80px;
+        margin-top: 80px;
 
         .etitle {
             font-weight: bold;
@@ -37,11 +39,11 @@
     .card-container {
         max-width: 500px;
         margin: 20px auto 0;
-        height: 550px;
+        height: 615px;
         box-shadow: none; /* 그림자 없애기 */
         // background-color: aqua;
         border: 2px solid;
-        margin-bottom: 50px;
+        margin-bottom: 60px;
         
     }
     
@@ -52,10 +54,10 @@
 
     .main-link-first-container {
         // background-color: yellow;
-        width: 60%;
+        width: 50%;
         margin-top: 20px;
         height: 500px;
-        margin-right: 50px;
+        margin-left: 150px;
 
         .first-container-img {
             .link-img {
@@ -213,9 +215,10 @@
 }
 
 .simple-go-container {
-    width: 100%;
+    width: 80%;
     height: 400px;
-    margin-top: 200px;
+    margin-top: 100px;
+    margin-left: 160px;
     
     // background-color: yellow;
 
