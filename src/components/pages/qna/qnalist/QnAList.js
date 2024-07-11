@@ -73,13 +73,14 @@ const QnAList = () => {
     toggleModal(); // 모달 창 열기
   };
 
-  const toggleAnswerBox = (qnaNo) => {
-    if (showansbox === qnaNo) {
-      // 이미 열린 상태이면 닫기
-      setshowAnsBox(null);
-    } else {
-      // 닫혀 있거나 다른 질문의 답변이 열린 경우, 해당 질문의 답변을 열기
-      setshowAnsBox(qnaNo);
+  const handleShowAnswer = (idx) => {
+    if (showansbox !== null) {
+      const updatedItems = showansbox.map((item, index) =>
+        index === idx && !showansbox[idx].flag
+          ? { flag: true }
+          : { flag: false },
+      );
+      setshowAnsBox(updatedItems);
     }
   };
 
@@ -129,6 +130,12 @@ const QnAList = () => {
     setPageMaker(res.data.pageMaker);
     setPageButtonCount(res.data.pageMaker.end);
     filterQnaData(res.data.qnas); // 초기 데이터 설정
+    const length = res.data.qnas.length;
+    let element = [];
+    for (let index = 0; index < length; index++) {
+      element = [...element, { flag: false }];
+    }
+    setshowAnsBox(element);
     console.log(res.data);
   };
 
@@ -342,14 +349,14 @@ const QnAList = () => {
         </InputGroup>
       </div>
       <div className='qnaListContainer'>
-        {filteredQnaData.map((qna) => (
-          <div key={qna.qnaNo}>
+        {filteredQnaData.map((qna, index) => (
+          <div key={index}>
             <div
               className='qnaListInnerBox'
               style={{
                 cursor: 'pointer',
               }}
-              onClick={() => toggleAnswerBox(qna.qnaNo)}
+              onClick={() => handleShowAnswer(index)}
             >
               <div className='qlistNum'>{qna.count}</div>
               <div className='qlistCategory'>{qna.qcategory}</div>
@@ -373,7 +380,7 @@ const QnAList = () => {
                 </div>
               ) : null}
             </div>
-            {showansbox !== null && showansbox === qna.qnaNo && (
+            {showansbox && showansbox[index].flag && (
               <div
                 className='ansbox'
                 style={{

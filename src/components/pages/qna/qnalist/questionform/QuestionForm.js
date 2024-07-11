@@ -65,13 +65,13 @@ const QuestionForm = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const questionFormData = {
-      title,
-      content,
-      category, // Include category in form data
-    };
+    // const questionFormData = {
+    //   title,
+    //   content,
+    //   category, // Include category in form data
+    // };
     // console.log(questionFormData);
-    navigate('/myquestionlist');
+    // navigate('/myquestionlist');
   };
 
   // const handleBack = () => {
@@ -110,7 +110,7 @@ const QuestionForm = () => {
               value={formData.qcategory}
               onChange={handleChange}
             >
-              <option value='' disabled selected>
+              <option value='' disabled>
                 카테고리를 선택하세요
               </option>
               <option>홈페이지</option>

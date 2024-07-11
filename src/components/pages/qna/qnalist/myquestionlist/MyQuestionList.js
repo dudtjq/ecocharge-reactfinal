@@ -42,6 +42,7 @@ const QnAList = () => {
   const [pageButtonCount, setPageButtonCount] = useState(0);
   const [pageMaker, setPageMaker] = useState({});
   const [filteredQnaData, setFilteredQnaData] = useState([]);
+  const [deleted, setDeleted] = useState(null);
 
   // const qnaListRenderingHandler = () => {
   //   let url = `${requestUrl}?page=${}`;
@@ -55,9 +56,16 @@ const QnAList = () => {
     setSelectedCategory(category.name);
   };
 
-  const handleRowClick = (no) => {
-    console.log('no:', no);
-    setActiveQuestion(no);
+  const handleRowClick = (idx) => {
+    if (activeQuestion !== null) {
+      console.log(idx);
+      const updatedItems = activeQuestion.map((item, index) =>
+        index === idx && !activeQuestion[idx].flag
+          ? { flag: true }
+          : { flag: false },
+      );
+      setActiveQuestion(updatedItems);
+    }
   };
 
   const handlePageChange = (no) => {
@@ -82,6 +90,7 @@ const QnAList = () => {
 
         if (res) {
           window.alert('게시글이 삭제되었습니다');
+          setDeleted(0);
         } else {
           window.alert('이미 삭제된 게시글입니다.');
         }
@@ -112,6 +121,13 @@ const QnAList = () => {
         setTotalPages(res.data.pageMaker.finalPage); // 전체 페이지 수 설정
         setPageButtonCount(res.data.pageMaker.end);
         setPageMaker(res.data.pageMaker);
+
+        const length = res.data.qnas.length;
+        let element = [];
+        for (let index = 0; index < length; index++) {
+          element = [...element, { flag: false }];
+        }
+        setActiveQuestion(element);
       } else {
         // qnas 배열이 없는 등의 예기치 않은 응답 처리
         console.error('Unexpected response format:', res.data);
@@ -124,7 +140,7 @@ const QnAList = () => {
   };
   useEffect(() => {
     fetchQnAData(); // 페이지 로드 시 데이터 불러오기
-  }, [searchParams, pageNo, location.state]);
+  }, [searchParams, pageNo, location.state, deleted]);
 
   useEffect(() => {
     filterData(); // 필터링 적용
@@ -197,9 +213,9 @@ const QnAList = () => {
       >
         <DropdownToggle caret>{selectedCategory}</DropdownToggle>
         <DropdownMenu>
-          {categories.map((category) => (
+          {categories.map((category, index) => (
             <DropdownItem
-              key={category.value}
+              key={index}
               onClick={() => handleCategorySelect(category)}
             >
               {category.name}
@@ -209,8 +225,8 @@ const QnAList = () => {
       </Dropdown>
 
       <div className='myQnaListContainer'>
-        {filteredQnaData.map((qna) => (
-          <div key={qna.id} className='myQnaListOuterBox'>
+        {filteredQnaData.map((qna, index) => (
+          <div key={index} className='myQnaListOuterBox'>
             <div
               className='myQnaListInnerBox'
               // style={{ cursor: 'pointer' }}
@@ -218,7 +234,7 @@ const QnAList = () => {
               style={{
                 cursor: 'pointer',
               }}
-              onClick={() => handleRowClick(qna.qnaNo)}
+              onClick={() => handleRowClick(index)}
             >
               <div className='mqlistNum'>{qna.count}</div>
               <div className='mqlistCategory'>{qna.qcategory}</div>
@@ -233,7 +249,7 @@ const QnAList = () => {
                 <FontAwesomeIcon icon={faSquareMinus} />
               </div>
             </div>
-            {activeQuestion !== null && activeQuestion === qna.qnaNo && (
+            {activeQuestion && activeQuestion[index].flag && (
               <div
                 className='responseBox'
                 style={{

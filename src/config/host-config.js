@@ -9,7 +9,7 @@ let backEndHostName; // 백엔드 서버 호스트 이름
 // 호스트 네임을 전역적으로 관리하려는 의도로 설정하는 파일입니다.
 if (clientHostName === 'localhost') {
   // 개발 중
-  backEndHostName = 'http://13.209.130.161';
+  backEndHostName = 'http://localhost:8181';
 } else if (clientHostName === 'ecocharge.co.kr') {
   // 배포해서 서비스 중
   backEndHostName = 'https://api.ecocharge.co.kr';
