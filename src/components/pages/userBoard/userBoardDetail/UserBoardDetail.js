@@ -15,6 +15,7 @@ import './UserBoardDetail.scss';
 import { Grid } from '@mui/material';
 import {
   createSearchParams,
+  useLocation,
   useNavigate,
   useParams,
   useSearchParams,
@@ -28,13 +29,19 @@ import {
   faTrash,
 } from '@fortawesome/free-solid-svg-icons';
 import axios from 'axios';
-import { API_BASE_URL, BOARD } from '../../../../config/host-config';
+import {
+  API_BASE_URL,
+  BOARD,
+  BOARD_REPLY,
+} from '../../../../config/host-config';
 import handleRequest from '../../../../utils/handleRequest';
 import axiosInstance from '../../../../config/axios-config';
 import AuthContext from '../../../../utils/AuthContext';
 
 const UserBoardDetail = () => {
   const navigate = useNavigate();
+  const REQUEST_URL = API_BASE_URL + BOARD_REPLY;
+  const { state } = useLocation();
 
   const [comments, setComments] = useState([]);
   const [commentText, setCommentText] = useState('');
@@ -62,12 +69,12 @@ const UserBoardDetail = () => {
   useEffect(() => {
     const boardDetailRenderingHandler = async () => {
       const boardDetail = await axios.get(
-        `${API_BASE_URL}${BOARD}/detail?boardNo=${boardNo}`,
+        `${API_BASE_URL}${BOARD}/detail?boardNo=${state}`,
       );
       console.log(boardDetail);
       setDetailBoard(boardDetail.data);
+      console.log(state);
     };
-
     boardDetailRenderingHandler();
   }, []);
 
@@ -89,17 +96,15 @@ const UserBoardDetail = () => {
     );
   };
 
-  const handleCommentSubmit = (e) => {
+  const handleCommentSubmit = async (e) => {
     e.preventDefault();
-    if (commentText.trim() && commentAuthor.trim()) {
-      const newComment = {
-        text: commentText,
-        author: commentAuthor,
-        time: new Date().toLocaleString(),
+    if (commentText.trim()) {
+      const body = {
+        boardNo: commentAuthor,
+        replyWriter: commentText,
+        replyText: '',
       };
-      setComments([...comments, newComment]);
-      setCommentText('');
-      setCommentAuthor('');
+      const res = await axiosInstance.post();
     }
   };
 
@@ -171,7 +176,7 @@ const UserBoardDetail = () => {
       </Grid>
       <Card className='UBD-card-container'>
         <Grid className='UserBoardInfo'>
-          <div className='BoardInfoDetail'>글번호: {detailBoard.boardNo}</div>
+          <div className='BoardInfoDetail'>글번호: {boardNo}</div>
           <div className='BoardInfoDetail'>작성자: {detailBoard.bwriter}</div>
           <div className='BoardInfoDetail'>
             작성일: {detailBoard.createDate}
@@ -253,9 +258,8 @@ const UserBoardDetail = () => {
                 type='text'
                 name='author'
                 id='commentAuthor'
-                value={commentAuthor}
-                onChange={(e) => setCommentAuthor(e.target.value)}
-                placeholder='이메일을 입력해주세요.'
+                value={localStorage.getItem('USER_NAME')}
+                readOnly={true}
               />
             </FormGroup>
             <FormGroup>

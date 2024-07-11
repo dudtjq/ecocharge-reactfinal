@@ -330,12 +330,14 @@ const QnAList = () => {
               <div className='qlistTitle'>{qna.qtitle}</div>
               <div className='qlistWriter'>{qna.qwriter}</div>
               <div className='qlistDate'>{qna.date}</div>
-              <div
-                className='qlistAnswer'
-                onClick={() => handleAnswerClick(qna.qnaNo)}
-              >
-                <FontAwesomeIcon icon={faPenToSquare} />
-              </div>
+              {qna.quserId === userId || userRole === 'ADMIN' ? (
+                <div
+                  className='qlistAnswer'
+                  onClick={() => handleAnswerClick(qna.qnaNo)}
+                >
+                  <FontAwesomeIcon icon={faPenToSquare} />
+                </div>
+              ) : null}
               {qna.quserId === userId || userRole === 'ADMIN' ? (
                 <div
                   className='mqlistDeleteBtn'
