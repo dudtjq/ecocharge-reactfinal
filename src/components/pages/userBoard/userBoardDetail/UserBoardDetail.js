@@ -58,6 +58,8 @@ const UserBoardDetail = () => {
 
   const [searchParams] = useSearchParams();
   const boardNo = parseInt(searchParams.get('boardNo')) || 1;
+  const replyNo = parseInt(searchParams.get('replyNo')) || 1;
+  const userName = localStorage.getItem('USER_NAME');
 
   useEffect(() => {
     const boardDetailRenderingHandler = async () => {
@@ -89,9 +91,16 @@ const UserBoardDetail = () => {
     );
   };
 
-  const handleCommentSubmit = (e) => {
+  //댓글 작성 핸들링
+  const handleCommentSubmit = async (e) => {
     e.preventDefault();
-    if (commentText.trim() && commentAuthor.trim()) {
+
+    try {
+      await axios.post(`${API_BASE_URL}/ecocharge/qna/reply/${replyNo}`, {
+        text: commentText,
+        author: commentAuthor,
+      });
+
       const newComment = {
         text: commentText,
         author: commentAuthor,
@@ -100,6 +109,11 @@ const UserBoardDetail = () => {
       setComments([...comments, newComment]);
       setCommentText('');
       setCommentAuthor('');
+      alert('댓글이 작성되었습니다.');
+    } catch (error) {
+      console.error('Error adding comment:', error);
+      alert('다시 시도해주세요');
+      // Handle error
     }
   };
 
@@ -247,16 +261,8 @@ const UserBoardDetail = () => {
                 for='commentAuthor'
                 style={{ fontWeight: 'bold', color: 'black' }}
               >
-                작성자
+                {userName != null ? userName : '작성자'}
               </Label>
-              <Input
-                type='text'
-                name='author'
-                id='commentAuthor'
-                value={commentAuthor}
-                onChange={(e) => setCommentAuthor(e.target.value)}
-                placeholder='이메일을 입력해주세요.'
-              />
             </FormGroup>
             <FormGroup>
               <Label for='commentText' style={{ fontWeight: 'bold' }}>
@@ -295,17 +301,6 @@ const UserBoardDetail = () => {
           <CardBody style={{ width: '400px' }}>
             <CardTitle tag='h5'>신고하기</CardTitle>
             <Form onSubmit={handleSubmitReport}>
-              <FormGroup>
-                <Label for='reporterEmail'>이메일</Label>
-                <Input
-                  type='email'
-                  name='email'
-                  id='reporterEmail'
-                  value={reporterEmail}
-                  onChange={(e) => setReporterEmail(e.target.value)}
-                  placeholder='이메일을 입력해주세요.'
-                />
-              </FormGroup>
               <FormGroup>
                 <Label>신고 사유</Label>
                 <FormGroup check>
