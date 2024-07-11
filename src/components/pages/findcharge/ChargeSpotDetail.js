@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
@@ -20,6 +20,8 @@ import '../../../scss/ChargeSpotDetail.scss';
 import Checkout from '../toss/Checkout';
 import axiosInstance from '../../../config/axios-config';
 import { API_BASE_URL, CHARGESPOT } from '../../../config/host-config';
+import handleRequest from '../../../utils/handleRequest';
+import AuthContext from '../../../utils/AuthContext';
 
 function ChargeSpotDetail() {
   const [open, setOpen] = useState(false);
@@ -30,15 +32,18 @@ function ChargeSpotDetail() {
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [review, setReview] = useState('');
   const navigate = useNavigate();
+  const { onLogout } = useContext(AuthContext);
 
   // 더미 데이터
   const address = '서울특별시 마포구 백범로 123-56';
   console.log(location);
   const REQUEST_URL = API_BASE_URL + CHARGESPOT;
   const [spotInfo, setSpotInfo] = useState(null);
+  const [spotReview, setSpotReview] = useState([]);
+
+  const statId = location.search.split('=')[1];
 
   useEffect(() => {
-    const statId = location.search.split('=')[1];
     const fetchSpotDetail = async () => {
       const res = await axiosInstance.get(
         REQUEST_URL + `/detail?statId=${statId}`,
@@ -50,6 +55,23 @@ function ChargeSpotDetail() {
     fetchSpotDetail();
   }, [location.search]);
 
+  useEffect(() => {
+    // 충전소 후기 요청 함수
+    const spotReviewList = async () => {
+      handleRequest(
+        () =>
+          axiosInstance.get(`${API_BASE_URL}/review/retrieve?statId=${statId}`),
+        (data) => {
+          setSpotReview(data.reviewList);
+        },
+        onLogout,
+        navigate,
+      );
+    };
+    spotReviewList();
+    console.log(spotReview);
+  }, [location.searchreview, review]);
+
   const handleReservation = () => {
     setOpen(true);
   };
@@ -58,9 +80,23 @@ function ChargeSpotDetail() {
     setOpen(false);
   };
 
-  const handleSubmitReview = () => {
-    // 이용후기 제출 로직 ㄱㄱ
-    console.log('이용후기가 등록되었습니다 :', review);
+  // 이용 후기 등록 핸들러
+  const handleSubmitReview = async () => {
+    const reviewData = {
+      statId,
+      userId: localStorage.getItem('USER_ID'),
+      content: review,
+    };
+    handleRequest(
+      () => axiosInstance.post(`${API_BASE_URL}/review/create`, reviewData),
+      (data) => {
+        console.log('이용후기가 등록되었습니다 :', review);
+        alert('후기가 등록되었습니다.');
+        setReview('');
+      },
+      onLogout,
+      navigate,
+    );
   };
 
   const handleBackToList = () => {
@@ -186,7 +222,16 @@ function ChargeSpotDetail() {
 
           <div className='section'>
             <h2>이용후기</h2>
-            <p>여기에 이용후기 표시</p>
+            {spotReview.length > 0 ? (
+              spotReview.map((review) => (
+                <div key={review.reviewNo}>
+                  <span>{review.content}</span>
+                  <p>{review.reviewDate}</p>
+                </div>
+              ))
+            ) : (
+              <div>작성된 후기가 없습니다.</div>
+            )}
           </div>
         </div>
       )}
