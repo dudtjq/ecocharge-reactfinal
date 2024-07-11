@@ -1,9 +1,9 @@
 import React from 'react';
 import '../mypage/MyPage.scss';
-import Chargespace from './chargespace/Chargespace';
 import MyInfo from './myInfo/MyInfo';
 import ReservationDetails from './reservationDetails/ReservationDetails';
 import InquiryList from './myInfo/inquiry/InquiryList';
+import MyReview from './MyReview/MyReview';
 
 const MyPage = () => {
   return (
@@ -21,8 +21,8 @@ const MyPage = () => {
           <InquiryList />
         </div>
         <div className='bookmarkChargeSpaceContainer'>
-          <h2 className='bookmarkChargeSpaceTitle'>즐겨찾는 충전소</h2>
-          <Chargespace />
+          <h2 className='bookmarkChargeSpaceTitle'>나의 후기</h2>
+          <MyReview />
         </div>
       </div>
     </div>
