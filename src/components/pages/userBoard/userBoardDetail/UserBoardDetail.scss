@@ -170,4 +170,26 @@
             }
         }
     }
+
+    .comment{
+        position: inherit;
+        display: flex;
+        flex-direction: column;
+        border-top: 1px solid black;
+        padding: 20px;
+    
+        .mqlistDeleteBtn {
+          position: absolute;  
+          font-size: 20px;
+          margin-left: 15px;
+          left: 85%;
+          text-align: center;
+    
+          &:hover {
+              background: red;
+              padding: 0 5px;
+              border-radius: 5px;
+          }
+      }
+      }
 }

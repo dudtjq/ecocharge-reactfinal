@@ -164,7 +164,7 @@ const QnAList = () => {
           <FontAwesomeIcon icon={faChevronLeft} /> &nbsp;Back
         </div>
       </div>
-      <div className='qnatitle'>문의내역</div>
+      <div className='qnatitle'>MyQuestion</div>
 
       <div className='comentbox'>
         <div className='comment-inner'>
@@ -226,14 +226,12 @@ const QnAList = () => {
               <div className='mqlistWriter'>{qna.qwriter}</div>
               <div className='mqlistDate'>{qna.date}</div>
 
-              {role === 'ADMIN' && (
-                <div
-                  className='mqlistDeleteBtn'
-                  onClick={() => handleDeleteClick(qna.qnaNo)}
-                >
-                  <FontAwesomeIcon icon={faSquareMinus} />
-                </div>
-              )}
+              <div
+                className='mqlistDeleteBtn'
+                onClick={() => handleDeleteClick(qna.qnaNo)}
+              >
+                <FontAwesomeIcon icon={faSquareMinus} />
+              </div>
             </div>
             {activeQuestion !== null && activeQuestion === qna.qnaNo && (
               <div

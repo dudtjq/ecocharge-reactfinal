@@ -239,7 +239,7 @@ const QnA = () => {
 
   return (
     <div className='qnacontainer'>
-      <div className='qnatitle'>Q & A</div>
+      <div className='qnatitle'>자주 묻는 질문</div>
       <div className='questionButtonsBox'>
         <div className='questionButtons'>
           {role === 'ADMIN' && (
@@ -254,7 +254,7 @@ const QnA = () => {
             className='go-direct-question-button'
             onClick={() => navigate('/qnalist')}
           >
-            1:1 문의
+            Q & A
           </button>
         </div>
       </div>
