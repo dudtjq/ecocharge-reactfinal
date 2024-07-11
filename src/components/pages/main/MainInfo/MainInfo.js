@@ -4,13 +4,14 @@ import { Button, Grid, Typography } from '@mui/material';
 import MainInfoItem from './mainInfoItem/MainInfoItem.js';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
+import { API_BASE_URL } from '../../../../config/host-config.js';
 
 const MainInfo = () => {
   const [newsList, setNewsList] = useState([]);
 
   useEffect(() => {
     const mainInfoRendering = async () => {
-      const res = await axios.get('http://localhost:8181/main/news');
+      const res = await axios.get(`${API_BASE_URL}/main/news`);
       setNewsList(res.data);
     };
 

@@ -48,7 +48,11 @@ function App() {
       >
         <Header />
         {/* <Main /> */}
-        <NavermapsProvider ncpClientId={id} submodules={['geocoder']}>
+        <NavermapsProvider
+          ncpClientId={id}
+          submodules={['geocoder']}
+          useHttps={true}
+        >
           <Routes>
             <Route path='/carList' element={<CarList />} />
             <Route path='/findCharge' element={<FindCharge />} />

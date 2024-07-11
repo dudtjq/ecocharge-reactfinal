@@ -5,6 +5,7 @@ import 'slick-carousel/slick/slick-theme.css';
 import './SimpleSlider.scss';
 import axios from 'axios';
 import SliderItem from './sliderItem/SliderItem';
+import { API_BASE_URL } from '../../../../config/host-config';
 
 function SimpleSlider() {
   let settings = {
@@ -32,7 +33,8 @@ function SimpleSlider() {
   useEffect(() => {
     const fetchSlider = async () => {
       try {
-        const res = await axios.get('http://localhost:8181/main/slider');
+        console.log('base url: ', API_BASE_URL);
+        const res = await axios.get(`${API_BASE_URL}/main/slider`);
         setSliderItems(res.data);
       } catch (error) {
         console.log(error);

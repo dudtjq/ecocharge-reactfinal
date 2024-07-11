@@ -4,13 +4,14 @@ import { Button, Grid, Typography } from '@mui/material';
 import MainQnAItem from './mainQnAItem/MainQnAItem';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
+import { API_BASE_URL } from '../../../../config/host-config';
 
 const MainQnA = () => {
   const [qnaList, setQnaList] = useState([]);
 
   useEffect(() => {
     const fetchQnA = async () => {
-      const res = await axios.get('http://localhost:8181/main/qna');
+      const res = await axios.get(`${API_BASE_URL}/main/qna`);
       setQnaList(res.data);
     };
 
