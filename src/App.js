@@ -92,7 +92,6 @@ function App() {
                 </div>
               }
             />
-            <Route path='/*' element={<Errorpage />}></Route>
           </Routes>
         </NavermapsProvider>
         <ScrollToTopButton />

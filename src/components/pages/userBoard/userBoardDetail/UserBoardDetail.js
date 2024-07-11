@@ -155,8 +155,15 @@ const UserBoardDetail = () => {
       boardNo,
       userId,
     };
+    console.log(userName);
 
     try {
+      if (userName == null) {
+        alert('회원 가입 후 이용해 주세요!');
+        navigate('/login');
+        return;
+      }
+
       await axios.post(
         `${API_BASE_URL}/ecocharge/board/reply/${boardNo}`,
         body,
@@ -343,13 +350,6 @@ const UserBoardDetail = () => {
               >
                 {userName != null ? userName : '작성자'}
               </Label>
-              <Input
-                type='text'
-                name='author'
-                id='commentAuthor'
-                value={localStorage.getItem('USER_NAME') || ''}
-                readOnly={true}
-              />
             </FormGroup>
             <FormGroup>
               <Label for='commentText' style={{ fontWeight: 'bold' }}>
