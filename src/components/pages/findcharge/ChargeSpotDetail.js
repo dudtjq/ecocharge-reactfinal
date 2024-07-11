@@ -34,17 +34,12 @@ function ChargeSpotDetail() {
   const navigate = useNavigate();
   const [aroundInfo, setAroundInfo] = useState(null);
   const { onLogout } = useContext(AuthContext);
-  const [reservationList, setReservationList] = useState([]);
 
   // 더미 데이터
   const address = '서울특별시 마포구 백범로 123-56';
   const REQUEST_URL = API_BASE_URL + CHARGESPOT;
 
   const [spotInfo, setSpotInfo] = useState(null);
-  const [{ lat, lng }, setLatLng] = useState({
-    lat: null,
-    lng: null,
-  });
   const [spotReview, setSpotReview] = useState([]);
 
   const statId = location.search.split('=')[1];
@@ -56,18 +51,12 @@ function ChargeSpotDetail() {
       );
 
       setSpotInfo(res.data);
-      setReservationList(res.data.chargerList);
       localStorage.setItem('STAT_ID', statId);
       console.log(res.data);
-      if (res) {
-        const lat = res.data.latLng.split(',')[0];
-        const lng = res.data.latLng.split(',')[1];
-        setLatLng({ lat, lng });
-      }
       console.log(res.data.chargerList);
+      console.log(location.search);
     };
     fetchSpotDetail();
-    console.log(reservationList);
   }, [location.search]);
 
   useEffect(() => {
@@ -85,20 +74,21 @@ function ChargeSpotDetail() {
     };
     spotReviewList();
     console.log(spotReview);
-  }, [location.searchreview, review]);
+  }, [review]);
 
   useEffect(() => {
     const fetchAroundSpotList = async () => {
       const res = await axiosInstance.get(
-        REQUEST_URL + `/aroundlist?lat=${lat}&lng=${lng}`,
+        REQUEST_URL +
+          `/aroundlist?lat=${spotInfo.latLng.split(',')[0]}&lng=${spotInfo.latLng.split(',')[1]}`,
       );
       setAroundInfo(res.data);
       console.log(res.data);
     };
-    if (lat !== null && lng !== null) {
+    if (spotInfo) {
       fetchAroundSpotList();
     }
-  }, [lat, lng]);
+  }, [spotInfo]);
 
   const handleReservation = () => {
     setOpen(true);
@@ -224,7 +214,13 @@ function ChargeSpotDetail() {
             <div className='section'>
               <h2>근처 충전소 목록</h2>
               {aroundInfo.map((info, index) => (
-                <div key={index} className='aroundList'>
+                <div
+                  key={index}
+                  className='aroundList'
+                  onClick={() => {
+                    navigate(`/ChargeSpotDetail?statId=${info.statId}`);
+                  }}
+                >
                   <p>{info.addr}</p>
                   <p>{info.statNm}</p>
                 </div>
@@ -263,9 +259,9 @@ function ChargeSpotDetail() {
             fullWidth
             margin='normal'
           >
-            {reservationList &&
-              reservationList.map((charger) => (
-                <MenuItem value={charger.chargerId}>
+            {spotInfo &&
+              spotInfo.chargerList.map((charger, index) => (
+                <MenuItem value={charger.chargerId} key={index}>
                   <div>
                     <div>{charger.chargerId}</div>
                     {charger.ynCheck === 'n' ? (

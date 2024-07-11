@@ -108,7 +108,7 @@ const WriteQnA = () => {
               value={formData.qcategory}
               onChange={handleChange}
             >
-              <option value='' disabled selected>
+              <option value='' disabled>
                 카테고리를 선택하세요
               </option>
               <option>홈페이지</option>

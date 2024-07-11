@@ -1,3 +1,5 @@
+import { style } from '@mui/system';
+import classNames from 'classnames';
 import React, { useEffect, useState } from 'react';
 import { Marker, NaverMap, useNavermaps } from 'react-naver-maps';
 
@@ -10,8 +12,9 @@ function MapComponent({
   setZoom,
   onMarkerClick,
 }) {
-  const navermaps = useNavermaps();
   const [center, setCenter] = useState({ lat, lng });
+  const navermaps = useNavermaps();
+  console.log(navermaps);
 
   useEffect(() => {
     if (addr !== null && addr !== '' && addr !== undefined) {
@@ -57,7 +60,7 @@ function MapComponent({
       mapDivId={'maps-getting-started-uncontrolled'}
       center={new navermaps.LatLng(center.lat, center.lng)}
       defaultZoom={15}
-      // onCenterChanged={handleCenterChanged}
+      mapTypeControl={true}
       onIdle={(e) => {
         console.log(e.__targets.scale.target.zoom);
         setCenter({
@@ -76,7 +79,7 @@ function MapComponent({
               console.log(marker.lat);
               onMarkerClick(marker.lat, marker.lng);
             }}
-          ></Marker>
+          />
         ))}
     </NaverMap>
   );

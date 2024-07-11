@@ -73,6 +73,17 @@ const QnAList = () => {
     toggleModal(); // 모달 창 열기
   };
 
+  const handleShowAnswer = (idx) => {
+    if (showansbox !== null) {
+      const updatedItems = showansbox.map((item, index) =>
+        index === idx && !showansbox[idx].flag
+          ? { flag: true }
+          : { flag: false },
+      );
+      setshowAnsBox(updatedItems);
+    }
+  };
+
   const handleQNADeleteClick = async (no) => {
     // 삭제처리함수
     console.log('삭제로직 작동');
@@ -119,6 +130,12 @@ const QnAList = () => {
     setPageMaker(res.data.pageMaker);
     setPageButtonCount(res.data.pageMaker.end);
     filterQnaData(res.data.qnas); // 초기 데이터 설정
+    const length = res.data.qnas.length;
+    let element = [];
+    for (let index = 0; index < length; index++) {
+      element = [...element, { flag: false }];
+    }
+    setshowAnsBox(element);
     console.log(res.data);
   };
 
@@ -332,14 +349,14 @@ const QnAList = () => {
         </InputGroup>
       </div>
       <div className='qnaListContainer'>
-        {filteredQnaData.map((qna) => (
-          <div key={qna.qnaNo}>
+        {filteredQnaData.map((qna, index) => (
+          <div key={index}>
             <div
               className='qnaListInnerBox'
               style={{
                 cursor: 'pointer',
               }}
-              onClick={() => setshowAnsBox(qna.qnaNo)}
+              onClick={() => handleShowAnswer(index)}
             >
               <div className='qlistNum'>{qna.count}</div>
               <div className='qlistCategory'>{qna.qcategory}</div>
@@ -363,7 +380,7 @@ const QnAList = () => {
                 </div>
               ) : null}
             </div>
-            {showansbox !== null && showansbox === qna.qnaNo && (
+            {showansbox && showansbox[index].flag && (
               <div
                 className='ansbox'
                 style={{

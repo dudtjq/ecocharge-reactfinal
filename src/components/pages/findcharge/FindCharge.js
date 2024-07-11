@@ -185,7 +185,7 @@ function FindCharge() {
         </div>
         <div className='map-area'>
           <MapDiv>
-            {mapLat !== null && (
+            {mapLat && (
               <NaverMapApi
                 lat={mapLat}
                 lng={mapLng}
